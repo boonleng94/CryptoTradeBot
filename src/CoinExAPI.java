@@ -71,7 +71,7 @@ public class CoinExAPI {
 		return signature;
 	}
 
-	private String getAccInfo() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+	public String getAccInfo() throws UnsupportedEncodingException, NoSuchAlgorithmException {
 		Map<String, String> params = new TreeMap<String, String>();
 		params.put("access_id", access_id);
 		params.put("tonce", tonce);
@@ -235,18 +235,16 @@ public class CoinExAPI {
 			e.printStackTrace();
 
 		}
-		JSONObject pendingOrders = new JSONObject(output);
-		String result = String.valueOf(pendingOrders.getJSONObject("data").getInt("count"));
-		
-		return result;
+				
+		return output;
 	}
 
-	public double[] getBidAsk() throws UnsupportedEncodingException, NoSuchAlgorithmException, JSONException {
+	public double[] getBidAsk(String market) throws UnsupportedEncodingException, NoSuchAlgorithmException, JSONException {
 
 		String output = "";
 
 		try {
-			URL url = new URL("https://api.coinex.com/v1/market/ticker?market=CETETH");
+			URL url = new URL("https://api.coinex.com/v1/market/ticker?market=" + market);
 			System.out.println(url);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
@@ -277,8 +275,7 @@ public class CoinExAPI {
 
 		}
 		JSONObject bidAsk = new JSONObject(output);
-		double[] result = { bidAsk.getJSONObject("data").getJSONObject("ticker").getDouble("buy"),
-				bidAsk.getJSONObject("data").getJSONObject("ticker").getDouble("sell") };
+		double[] result = { bidAsk.getJSONObject("data").getJSONObject("ticker").getDouble("buy"),bidAsk.getJSONObject("data").getJSONObject("ticker").getDouble("sell") };
 		return result;
 	}
 
@@ -340,7 +337,7 @@ public class CoinExAPI {
 		return output;
 	}
 
-	public String setLimitOrder(String amount, String market, String price, String type)
+	public String setLimitOrder(String market, String amount, String price, String type)
 			throws UnsupportedEncodingException, NoSuchAlgorithmException {
 		Map<String, String> params = new TreeMap<String, String>();
 		params.put("access_id", access_id);

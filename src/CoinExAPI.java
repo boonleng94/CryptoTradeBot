@@ -28,8 +28,6 @@ public class CoinExAPI {
 		this.secret_key = secret_key;
 	}
 
-
-
 	public static HttpURLConnection setHttpHeaders(HttpURLConnection conn, String signature) {
 		conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
 		conn.setRequestProperty("Accept", "application/json");

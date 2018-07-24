@@ -8,8 +8,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class BotLogicTest {
-	private static String access_id = "enter your access id here";
-	private static String secret_key = "enter your secret key here";
+	private static String access_id = "enter your own";
+	private static String secret_key = "enter your own";
 	
 	//Change this to whatever market u wanna play in
 	private static String market = "CETETH";
@@ -17,7 +17,11 @@ public class BotLogicTest {
 	private static double minQty = 1;
 	//Tokens to retain in balance
 	private static double minTokenBal = 500;
-
+	//Excess Ratio for calculateFormula
+	private static double excessRatio = 30;
+	//Reduce amount to buy for qty if not enough USDT to buy (BTCUSDT)
+	private static double amountReduction = 0.0005;
+	
 	public static CoinExAPI cep = new CoinExAPI(access_id, secret_key);
 
 	// Bot logic:
@@ -122,12 +126,18 @@ public class BotLogicTest {
 		}
 	}
 	
-	private static void setOrders() throws UnsupportedEncodingException, NoSuchAlgorithmException, JSONException {
+	private static void setOrders(double hourlyDiff) throws UnsupportedEncodingException, NoSuchAlgorithmException, JSONException {
 		// Step 1
 		// Get Real time Highest Bid (buy price) and Lowest Ask (lowest sell price)
 		double[] bidAsk = cep.getBidAsk(market);
 		double bid = bidAsk[0];
 		double ask = bidAsk[1];
+		
+		//get btc/usdt balance in account
+		JSONObject bal = new JSONObject(cep.getAccInfo());
+		double BTCBal = Double.parseDouble(bal.getJSONObject("data").getJSONObject("BTC").getString("available"));
+		double USDTBal = Double.parseDouble(bal.getJSONObject("data").getJSONObject("USDT").getString("available"));
+
 		System.out.printf(market + "\nBID = %.8f, ASK = %.8f", bid, ask);
 
 		int divisor = 10000; // tentative 10k - to ensure our bid is higher than current bid for filling the
@@ -136,9 +146,25 @@ public class BotLogicTest {
 		System.out.printf("\nTESTBID = %.8f", orderBid);
 
 		// Step 2
-		// Set Limit Buy/Sell Order, qty = 0.01BTC worth
-		String qty = String.valueOf(0.01 / orderBid);
+		// Set Limit Buy/Sell Order, qty = no.of btc to buy
+		String qty = String.valueOf(Double.parseDouble(calculateQty(hourlyDiff,"CETUSDT")) / orderBid);
 
+		//check if enough btc to sell
+		if(Double.parseDouble(qty) > BTCBal) {
+			qty = String.valueOf(BTCBal);
+		}
+		
+		//check if enough USDT to buy btc
+		while(Double.parseDouble(qty) * orderBid > USDTBal) {
+			
+			//reduce qty to buy (FOR BTCUSDT)
+			qty = String.valueOf(Double.parseDouble(qty) - amountReduction);
+		}
+		
+		if(Double.parseDouble(qty) * orderBid > USDTBal) {
+			System.out.println("Not enough USDT to buy BTC");
+		}
+		
 		// Check >= minQty
 		if (Double.parseDouble(qty) >= minQty) {
 			// // Place limit buy order
@@ -172,8 +198,10 @@ public class BotLogicTest {
 		
 	}
 	
-	private static void mine() throws UnsupportedEncodingException, NoSuchAlgorithmException, JSONException {
-		setOrders();
+	private static void mine(double hourlyDiff) throws UnsupportedEncodingException, NoSuchAlgorithmException, JSONException {
+		
+		//place buy/sell orders
+		setOrders(hourlyDiff);
 		
 		// Step 3
 		// check pending order for 200sec (if there is pending order after setting buy/sell) this is to ensure orders are eaten within 200s
@@ -209,17 +237,27 @@ public class BotLogicTest {
 		if (pending_order) {
 			cancelPendingOrders();
 		}
+	}
+	
+	//calculate amount in USDT to buy/sell per order
+	private static String calculateQty(double hourlyDiff, String tokenPairing) throws UnsupportedEncodingException, NoSuchAlgorithmException, JSONException {
+		
+		double[] tokenPrice = cep.getBidAsk(tokenPairing.toUpperCase());
+		
+		double legendaryFormula = (hourlyDiff * tokenPrice[0] * excessRatio) /2;
+		
+		return String.format("%.3f", legendaryFormula);
 
-		// go back step 2 and set buy/sell order
-		setOrders();
 	}
 	
 	public static void main(String[] args)throws UnsupportedEncodingException, NoSuchAlgorithmException, JSONException, InterruptedException {		
-		// Step 0.1 + 0.2 Done
-		buySameBTCUSD();
-		
+	
 		//mine every 30s
 		while (true) {
+			
+			// Step 0.1 + 0.2 Done
+			buySameBTCUSD();
+			
 			// Step 0.4, 0.6, 0.7 DONE
 			double[] miningInfo = getMiningInfo();
 
@@ -239,7 +277,7 @@ public class BotLogicTest {
 			
 			if (unmined > 0) {
 				// Mining quota not reached
-				mine();
+				mine(mineDiff);
 				getCurrentTime = false;
 			} else {
 				// Mining quota reached
@@ -270,6 +308,7 @@ public class BotLogicTest {
 			//30s loop
 			Thread.sleep(30000);
 		}
+	
 	}
 
 	// WebSocket Connection and Handle incoming msg (working but not implemented)

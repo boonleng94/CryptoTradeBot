@@ -2,9 +2,13 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="C:/Users/darks/Downloads/javax.websocket-client-api-1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/darks/Downloads/gson-2.6.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/darks/Downloads/tyrus-standalone-client-1.3.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/darks/Downloads/java-json.jar"/>
 	<classpathentry kind="lib" path="C:/Users/boonleng/Documents/GitHub/TradeBot/src/java-json.jar"/>
 	<classpathentry kind="lib" path="C:/Users/boonleng/Documents/GitHub/TradeBot/src/javax.websocket-client-api-1.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/boonleng/Documents/GitHub/TradeBot/src/tyrus-standalone-client-1.3.3.jar"/>
-	<classpathentry kind="lib" path="C:/Users/boonleng/Documents/GitHub/TradeBot/src/gson-2.6.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/boonleng/Documents/GitHub/TradeBot/src/gson-2.6.2.jar"/> 
 	<classpathentry kind="output" path="bin"/>
 </classpath>

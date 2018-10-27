@@ -12,7 +12,7 @@ public class BotLogicTest {
 	private static String secret_key = "enter your own";
 	
 	//Change this to whatever market u wanna play in
-	private static String market = "CETETH";
+	private static String market = "BTCUSDT";
 	//Change this to whatever market min. qty (api min = 0.01)
 	private static double minQty = 1;
 	//Tokens to retain in balance
@@ -24,24 +24,6 @@ public class BotLogicTest {
 	
 	public static CoinExAPI cep = new CoinExAPI(access_id, secret_key);
 
-	// Bot logic:
-	// 0.1. Get Balance BTC and USDT
-	// 0.2. Buy.sell BTC/USD to get same amount worth in BTC and USDT
-	// 0.3  Open websocket (To allow more calls)
-	// 0.4. Get Mining Difficulty
-	// 0.5 Set ratio to mine to prevent overmining (95% default)
-	// 0.6 Check tokens mined
-	// 0.7 Check tokens not yet mined
-	// 0.8 Cancel all pending orders
-	// 0.9 Buy/sell BTC/USD to get same amount worth in BTC and USDT
-	// 1. Get bid
-	// 2. Put .xx buy order and same sell order
-	// 3.Check Pending (Buy or sell)
-	// 4 Update tokens mined and not mined if order executed
-	// 6.5 If order still pending for a certain period of time, cancel order and go
-	// back to step 2 and place buy or sell order (whichever that was cancelled at +
-	// #% for buy order or - #% for sell order)
-	// 7. Repeat from 0.6
 
 	private static void buySameBTCUSD() throws UnsupportedEncodingException, NoSuchAlgorithmException, JSONException {
 		// Step 0.1 Done (Account Balance (Attributes: available/frozen))
@@ -140,8 +122,7 @@ public class BotLogicTest {
 
 		System.out.printf(market + "\nBID = %.8f, ASK = %.8f", bid, ask);
 
-		int divisor = 10000; // tentative 10k - to ensure our bid is higher than current bid for filling the
-								// order using our ask
+		int divisor = 10000; // tentative 10k - to ensure our bid is higher than current bid for filling the order using our ask //to change after testing
 		double orderBid = bid + bid / divisor;
 		System.out.printf("\nTESTBID = %.8f", orderBid);
 
@@ -251,7 +232,6 @@ public class BotLogicTest {
 	}
 	
 	public static void main(String[] args)throws UnsupportedEncodingException, NoSuchAlgorithmException, JSONException, InterruptedException {		
-	
 		//mine every 30s
 		while (true) {
 			
